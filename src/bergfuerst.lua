@@ -85,8 +85,9 @@ function RefreshAccount (account, since)
     securities[index].userdata = {}
 
     table.insert(securities[index].userdata, { key = "Laufzeit", value = (element:xpath("./td[4]/text()[1]"):text()) })
-    table.insert(securities[index].userdata, { key = "Zinssatz (p.a.)", value = (element:xpath("./td[3]/text()[1]"):text()) })
-    
+    table.insert(securities[index].userdata, { key = "Zinssatz (p.a.)", value = (element:xpath("./td[3]/text()[1]"):text()) })    
+    table.insert(securities[index].userdata, { key = "Zinsertrag", value = MM.localizeAmount(interestAmount, "EUR") })
+
     securities[index].name = element:xpath("./td[1]/strong"):get(1):text()
     securities[index].market = "BERGFÜRST"
     securities[index].currency = "EUR"
