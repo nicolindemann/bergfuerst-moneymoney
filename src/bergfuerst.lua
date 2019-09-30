@@ -68,7 +68,7 @@ function RefreshAccount (account, since)
   local investments = html:xpath("//table[contains(@class, 'table-overview')]/tbody/tr[contains(@class, 'cursor-pointer')]")
   
   investments:each(function (index, element)
-    local amount = tonumber((element:xpath("./td[2]/text()[1]"):text():sub(1, -5):gsub(",", ".")))
+    local amount = tonumber((element:xpath("./td[2]/text()[1]"):text():sub(1, -5):gsub("%.", ""):gsub(",", ".")))
     local longInterestString = trim((html:xpath("//*[@id='" ..  element:attr("href"):sub(2) .. "']//div[contains(@class, 'table-details-container')]"):get(1):text():sub(-700)))
     local euroSignLocation = longInterestString:find("€")
     
