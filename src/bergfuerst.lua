@@ -21,13 +21,13 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 -- SOFTWARE.
 
-WebBanking{version     = 1.1,
+WebBanking{version     = 1.2,
            url         = "https://de.bergfuerst.com",
-           services    = {"BERGFÜRST Account"},
+           services    = {"Bergfürst Account"},
            description = "Fetches balances from BERGFÜRST Website and returns them as securities"}
 
 function SupportsBank (protocol, bankCode)
-  return protocol == ProtocolWebBanking and bankCode == "BERGFÜRST Account"
+  return protocol == ProtocolWebBanking and bankCode == "Bergfürst Account"
 end
 
 function InitializeSession (protocol, bankCode, username, username2, password, username3)
@@ -61,14 +61,14 @@ end
 function RefreshAccount (account, since)
   html = HTML(connection:get("https://de.bergfuerst.com/meine-investments"))
 
-  local totalInterestAmount = tonumber((html:xpath("//*[@id='top']/div[2]/div/div/div[2]/div/div[4]/p[2]/strong"):get(1):text():sub(1, -5):gsub(",", ".")))
-  local balance = tonumber((html:xpath("//*[@id='top']/div[2]/div/div/div/div/div[2]/p[2]/strong"):get(1):text():sub(1, -5):gsub("%.", ""):gsub(",", ".")))
+  local totalInterestAmount = tonumber((html:xpath("//*[@id='top']/div[2]/div/div[1]/div[1]/div/div[3]/p[2]/strong"):text():sub(1, -5):gsub(",", ".")))
+  local balance = tonumber((html:xpath("//*[@id='top']/div[2]/div/div[1]/div[1]/div/div[1]/p[2]/strong"):text():sub(1, -5):gsub("%.", ""):gsub(",", ".")))
   local securities = {}
   local investments = html:xpath("//table[contains(@class, 'table-overview')]/tbody/tr[contains(@class, 'cursor-pointer')]")
   
   investments:each(function (index, element)
-    local amount = tonumber((element:xpath("./td[2]/text()[1]"):text():sub(1, -5):gsub("%.", ""):gsub(",", ".")))
-    local longInterestString = trim((html:xpath("//*[@id='" ..  element:attr("href"):sub(2) .. "']//div[contains(@class, 'table-details-container')]"):get(1):text():sub(-700)))
+    local amount = tonumber((element:xpath("./td[2]/text()[1]"):text():sub(1, -5):gsub(",", ".")))
+    local longInterestString = trim((html:xpath("(//*[@id='" ..  element:attr("href"):sub(2) .. "']//div[contains(@class, 'table-details-container')])[2]"):text():sub(-100)))
     local euroSignLocation = longInterestString:find("€")
     
     if (euroSignLocation == 6) then
@@ -76,17 +76,18 @@ function RefreshAccount (account, since)
       longInterestString = longInterestString:sub(1, longInterestString:len() - 2)
       interestAmount = tonumber((longInterestString:gsub(",", ".")))
     else
-      local shortInterestString = trim((html:xpath("//*[@id='" ..  element:attr("href"):sub(2) .. "']//div[contains(@class, 'table-details-container')]"):get(1):text():sub(-10)))
-      interestAmount = tonumber((trim(shortInterestString:sub(1, shortInterestString:len() - 4)):gsub(",", ".")))
+      interestAmount = nil
     end
 
     securities[index] = {}
     securities[index].userdata = {}
 
-    table.insert(securities[index].userdata, { key = "Laufzeit", value = (element:xpath("./td[4]/text()[1]"):text()) })
-    table.insert(securities[index].userdata, { key = "Zinssatz (p.a.)", value = (element:xpath("./td[3]/text()[1]"):text()) })    
-    table.insert(securities[index].userdata, { key = "Zinsertrag", value = MM.localizeAmount(interestAmount, "EUR") })
-
+    if (interestAmount ~= nil) then
+      table.insert(securities[index].userdata, { key = "Laufzeit", value = (element:xpath("./td[6]/text()[1]"):text()) })
+      table.insert(securities[index].userdata, { key = "Zinssatz (p.a.)", value = (element:xpath("./td[3]/text()[1]"):text()) }) 
+      table.insert(securities[index].userdata, { key = "Zinsertrag", value = MM.localizeAmount(interestAmount, "EUR") })
+    end
+ 
     securities[index].name = element:xpath("./td[1]/strong"):get(1):text()
     securities[index].market = "BERGFÜRST"
     securities[index].currency = "EUR"
