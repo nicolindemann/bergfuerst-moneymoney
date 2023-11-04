@@ -60,9 +60,8 @@ end
 
 function RefreshAccount (account, since)
   html = HTML(connection:get("https://de.bergfuerst.com/meine-investments"))
-
-  local totalInterestAmount = tonumber((html:xpath("//*[@id='top']/div[2]/div/div[1]/div[1]/div/div[3]/p[2]/strong"):text():sub(1, -5):gsub(",", ".")))
-  local balance = tonumber((html:xpath("//*[@id='top']/div[2]/div/div[1]/div[1]/div/div[1]/p[2]/strong"):text():sub(1, -5):gsub("%.", ""):gsub(",", ".")))
+  local totalInterestAmount = tonumber((html:xpath("/html/body/div[1]/div[2]/div/div[3]/table/tfoot/tr/td[4]/strong"):text():sub(1, -5):gsub(",", ".")))
+  local balance = tonumber((html:xpath("/html/body/div[1]/div[2]/div/div[3]/table/tfoot/tr/td[2]/strong"):text():sub(1, -5):gsub("%.", ""):gsub(",", ".")))
   local securities = {}
   local investments = html:xpath("//table[contains(@class, 'table-overview')]/tbody/tr[contains(@class, 'cursor-pointer')]")
   
